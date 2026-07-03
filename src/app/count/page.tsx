@@ -195,10 +195,10 @@ export default function Page() {
 			</div>
 
 			<div style={{ marginTop: 12 }}>
-				<button onClick={saveCounts} disabled={loading || !locationId || !sessionId}>
+				<button onClick={() => saveCounts()} disabled={loading || !locationId || !sessionId}>
 					Save
 				</button>
-				<button onClick={submitCounts} disabled={loading || !locationId || !sessionId} style={{ marginLeft: 8 }}>
+				<button onClick={() => submitCounts()} disabled={loading || !locationId || !sessionId} style={{ marginLeft: 8 }}>
 					Submit
 				</button>
 			</div>

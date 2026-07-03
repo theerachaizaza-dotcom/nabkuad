@@ -8,6 +8,21 @@ export const metadata: Metadata = {
   title: 'Products | Admin',
 };
 
+type ProductRow = {
+  id: string;
+  name: string;
+  sku: string | null;
+  category_id: string | null;
+  capacity_ml: number;
+  count_mode: 'fractional' | 'unit';
+  price_per_unit: string | null;
+  unit: string;
+  is_active: boolean;
+  categories: {
+    name?: string | null;
+  } | null;
+};
+
 const getProducts = cache(async () => {
   const { data, error } = await supabaseAdmin
     .from('products')
@@ -18,7 +33,9 @@ const getProducts = cache(async () => {
     throw new Error(error.message);
   }
 
-  return (data ?? []).map((row) => ({
+  const rows = (data ?? []) as ProductRow[];
+
+  return rows.map((row) => ({
     id: row.id,
     name: row.name,
     sku: row.sku,
@@ -59,7 +76,7 @@ async function createProduct(formData: FormData) {
     is_active: formData.get('is_active') === 'on',
   };
 
-  await supabaseAdmin.from('products').insert(payload);
+  await (supabaseAdmin.from('products') as any).insert(payload);
   revalidatePath('/(admin)/products');
 }
 
@@ -80,7 +97,7 @@ async function updateProduct(formData: FormData) {
     is_active: formData.get('is_active') === 'on',
   };
 
-  await supabaseAdmin.from('products').update(payload).eq('id', productId);
+  await (supabaseAdmin.from('products') as any).update(payload).eq('id', productId);
   revalidatePath('/(admin)/products');
 }
 
@@ -90,7 +107,7 @@ async function deleteProduct(formData: FormData) {
   const productId = formData.get('product_id')?.toString();
   if (!productId) return;
 
-  await supabaseAdmin.from('products').delete().eq('id', productId);
+  await (supabaseAdmin.from('products') as any).delete().eq('id', productId);
   revalidatePath('/(admin)/products');
 }
 

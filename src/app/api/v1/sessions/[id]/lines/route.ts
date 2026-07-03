@@ -7,10 +7,10 @@ function jsonError(message: string | string[], status = 400) {
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const resolvedParams = await params;
-  let sessionId = resolvedParams?.id;
+  let sessionId: string | undefined = resolvedParams?.id;
 
   // Fallback: derive sessionId from request URL if params not provided
   if (!sessionId) {

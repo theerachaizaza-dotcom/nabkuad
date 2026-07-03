@@ -21,7 +21,7 @@ const getSessions = cache(async () => {
   return (data ?? []) as Session[];
 });
 
-async function createSession(formData: FormData) {
+async function createSession(formData: FormData): Promise<void> {
   'use server';
 
   const name = formData.get('name')?.toString().trim() || `Session ${new Date().toISOString().slice(0, 10)}`;
@@ -35,8 +35,7 @@ async function createSession(formData: FormData) {
     note,
   };
 
-  const { data: sessionData, error: sessionError } = await supabaseAdmin
-    .from('count_sessions')
+  const { data: sessionData, error: sessionError } = await (supabaseAdmin.from('count_sessions') as any)
     .insert(sessionPayload)
     .select('id')
     .single();
@@ -45,7 +44,11 @@ async function createSession(formData: FormData) {
     throw new Error(sessionError?.message || 'Failed to create session');
   }
 
-  const { data: locations, error: locationsError } = await supabaseAdmin
+  type LocationRow = {
+    id: string;
+  };
+
+  const { data: locationsData, error: locationsError } = await supabaseAdmin
     .from('locations')
     .select('id')
     .eq('is_active', true)
@@ -55,14 +58,15 @@ async function createSession(formData: FormData) {
     throw new Error(locationsError.message);
   }
 
-  const submissionRows = (locations ?? []).map((location) => ({
+  const locations = (locationsData ?? []) as LocationRow[];
+
+  const submissionRows = locations.map((location) => ({
     session_id: sessionData.id,
     location_id: location.id,
     status: 'pending' as const,
   }));
 
-  const { error: submissionsError } = await supabaseAdmin
-    .from('location_submissions')
+  const { error: submissionsError } = await (supabaseAdmin.from('location_submissions') as any)
     .insert(submissionRows);
 
   if (submissionsError) {
@@ -70,7 +74,6 @@ async function createSession(formData: FormData) {
   }
 
   revalidatePath('/sessions');
-  return null;
 }
 
 export default async function SessionsPage() {

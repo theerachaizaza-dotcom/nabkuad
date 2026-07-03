@@ -7,7 +7,13 @@ export const metadata: Metadata = {
   title: 'Dashboard | Admin',
 };
 
-const getCurrentSession = cache(async () => {
+type CurrentSession = {
+  id: string;
+  name: string;
+  count_date: string;
+};
+
+const getCurrentSession = cache(async (): Promise<CurrentSession | null> => {
   const { data, error } = await supabaseAdmin
     .from('count_sessions')
     .select('id, name, count_date')
@@ -23,18 +29,31 @@ const getCurrentSession = cache(async () => {
   return data;
 });
 
+type LocationSubmissionRow = {
+  id: string;
+  status: string;
+  submitted_at: string | null;
+  locations: {
+    name?: string | null;
+    code?: string | null;
+    sort_order?: number | null;
+  } | null;
+};
+
 const getLocationStatuses = cache(async (sessionId: string) => {
   const { data, error } = await supabaseAdmin
     .from('location_submissions')
     .select('id, status, submitted_at, locations(name, code, sort_order)')
     .eq('session_id', sessionId)
-    .order('locations.sort_order', { ascending: true });
+    .order('sort_order', { ascending: true, foreignTable: 'locations' });
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return (data ?? []).map((row) => ({
+  const rows = (data ?? []) as LocationSubmissionRow[];
+
+  return rows.map((row) => ({
     id: row.id,
     status: row.status,
     submitted_at: row.submitted_at,
@@ -43,15 +62,14 @@ const getLocationStatuses = cache(async (sessionId: string) => {
   }));
 });
 
-async function closeSession(formData: FormData) {
+async function closeSession(formData: FormData): Promise<void> {
   'use server';
 
   const sessionId = formData.get('session_id')?.toString();
   if (!sessionId) return;
 
-  const { error } = await supabaseAdmin
-    .from('count_sessions')
-    .update({ status: 'closed' as const, closed_at: new Date().toISOString() })
+  const { error } = await (supabaseAdmin.from('count_sessions') as any)
+    .update({ status: 'closed', closed_at: new Date().toISOString() })
     .eq('id', sessionId);
 
   if (error) {
@@ -60,7 +78,6 @@ async function closeSession(formData: FormData) {
 
   revalidatePath('/dashboard');
   revalidatePath('/sessions');
-  return null;
 }
 
 export default async function DashboardPage() {

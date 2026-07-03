@@ -10,7 +10,7 @@ function jsonError(message: string | string[], status = 400) {
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   let payload: any;
 
@@ -24,7 +24,7 @@ export async function POST(
   }
 
   const resolvedParams = await params;
-  let sessionId = resolvedParams?.id;
+  let sessionId: string | undefined = resolvedParams?.id;
 
   // Fallback: derive sessionId from request URL if params not provided
   if (!sessionId) {

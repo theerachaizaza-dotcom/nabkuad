@@ -9,7 +9,7 @@ function jsonError(message: string | string[], status = 400) {
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   let payload: any;
 
@@ -23,7 +23,7 @@ export async function POST(
   }
 
   const resolvedParams = await params;
-  let sessionId = resolvedParams?.id;
+  let sessionId: string | undefined = resolvedParams?.id;
   if (!sessionId) {
     try {
       const u = new URL(req.url);
@@ -36,8 +36,7 @@ export async function POST(
 
   if (!sessionId) return jsonError('Missing session id', 400);
 
-  const { data, error } = await supabaseAdmin
-    .from('location_submissions')
+  const { data, error } = await (supabaseAdmin.from('location_submissions') as any)
     .update({ status: 'submitted', submitted_at: new Date().toISOString() })
     .eq('session_id', sessionId)
     .eq('location_id', payload.location_id);
@@ -48,8 +47,7 @@ export async function POST(
 
   if (!data || data.length === 0) {
     // If no submission row exists yet, create one and mark submitted
-    const { error: insertError } = await supabaseAdmin
-      .from('location_submissions')
+    const { error: insertError } = await (supabaseAdmin.from('location_submissions') as any)
       .insert({ session_id: sessionId, location_id: payload.location_id, status: 'submitted', submitted_at: new Date().toISOString() });
 
     if (insertError) {
