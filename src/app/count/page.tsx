@@ -5,7 +5,9 @@ import React, { useEffect, useState } from 'react';
 type Product = {
 	id: string;
 	name: string;
+	sku?: string | null;
 	count_mode: string;
+	category_id?: string | null;
 	capacity_ml?: number;
 };
 
@@ -20,12 +22,20 @@ type Location = {
 	name: string;
 };
 
+type Category = {
+	id: string;
+	name: string;
+};
+
 export default function Page() {
 	const [products, setProducts] = useState<Product[]>([]);
+	const [categories, setCategories] = useState<Category[]>([]);
 	const [sessions, setSessions] = useState<Session[]>([]);
 	const [locations, setLocations] = useState<Location[]>([]);
 	const [sessionId, setSessionId] = useState<string | null>(null);
 	const [locationId, setLocationId] = useState<string | null>(null);
+	const [searchTerm, setSearchTerm] = useState('');
+	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [lines, setLines] = useState<Record<string, { full_bottles: number; leftover_ml: number }>>({});
 	const [loading, setLoading] = useState(false);
 
@@ -50,9 +60,11 @@ export default function Page() {
 			const sessionsData = await sessionsRes.json();
 
 			setProducts(bootstrapData.products ?? []);
+			setCategories(bootstrapData.categories ?? []);
 			setLocations(bootstrapData.locations ?? []);
 			setSessions(sessionsData.sessions ?? []);
 			setSessionId((sessionsData.sessions ?? [])[0]?.id ?? null);
+			setLocationId((bootstrapData.locations ?? [])[0]?.id ?? null);
 		}
 		load();
 	}, []);
@@ -83,6 +95,24 @@ export default function Page() {
 			[productId]: { full_bottles: prev[productId]?.full_bottles ?? 0, leftover_ml: prev[productId]?.leftover_ml ?? 0, ...patch },
 		}));
 	}
+
+	const filteredProducts = products.filter((product) => {
+		const categoryName = categories.find((cat) => cat.id === product.category_id)?.name ?? '';
+		const normalizedSearch = searchTerm.trim().toLowerCase();
+
+		if (selectedCategory !== 'All' && categoryName !== selectedCategory) {
+			return false;
+		}
+
+		if (!normalizedSearch) return true;
+
+		return (
+			product.name.toLowerCase().includes(normalizedSearch) ||
+			(product.sku?.toLowerCase().includes(normalizedSearch) ?? false)
+		);
+	});
+
+	const categoryOptions = ['All', ...categories.map((category) => category.name)];
 
 	async function saveCounts(showAlert = true) {
 		if (!sessionId || !locationId) {
@@ -137,7 +167,43 @@ export default function Page() {
 		<div style={{ padding: 16 }}>
 			<h1>Mobile Count (functional)</h1>
 
-			<div>
+			<div style={{ position: 'sticky', top: 0, zIndex: 20, background: '#fff', paddingTop: 16, paddingBottom: 8, borderBottom: '1px solid #ddd' }}>
+				<div style={{ marginBottom: 8 }}>
+					<label htmlFor="count-search" style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}>
+						Search products
+					</label>
+					<input
+						id="count-search"
+						type="search"
+						placeholder="Search by product name or SKU"
+						value={searchTerm}
+						onChange={(e) => setSearchTerm(e.target.value)}
+						style={{ width: '100%', padding: '10px 12px', borderRadius: 12, border: '1px solid #cbd5e1', outline: 'none' }}
+					/>
+				</div>
+
+				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+					{categoryOptions.map((category) => (
+						<button
+							key={category}
+							type="button"
+							onClick={() => setSelectedCategory(category)}
+							style={{
+								padding: '8px 12px',
+								borderRadius: 9999,
+								border: selectedCategory === category ? '1px solid #0f766e' : '1px solid #cbd5e1',
+								background: selectedCategory === category ? '#0f766e' : '#f8fafc',
+								color: selectedCategory === category ? '#f8fafc' : '#334155',
+								cursor: 'pointer',
+							}}
+						>
+							{category}
+						</button>
+					))}
+				</div>
+			</div>
+
+			<div style={{ marginBottom: 12 }}>
 				<label>Session: </label>
 				<select value={sessionId ?? ''} onChange={(e) => setSessionId(e.target.value || null)}>
 					<option value="">-- select --</option>
@@ -162,36 +228,62 @@ export default function Page() {
 			</div>
 
 			<div style={{ marginTop: 12 }}>
-				{products.map((p) => (
-					<div key={p.id} style={{ borderBottom: '1px solid #eee', padding: 8 }}>
-						<div>{p.name}</div>
-						{p.count_mode === 'fractional' ? (
-							<div>
-								<label>Full bottles: </label>
-								<input
-									type="number"
-									value={lines[p.id]?.full_bottles ?? 0}
-									onChange={(e) => updateLine(p.id, { full_bottles: parseInt(e.target.value || '0', 10) })}
-								/>
-								<label style={{ marginLeft: 8 }}>Leftover ml: </label>
-								<input
-									type="number"
-									value={lines[p.id]?.leftover_ml ?? 0}
-									onChange={(e) => updateLine(p.id, { leftover_ml: parseInt(e.target.value || '0', 10) })}
-								/>
+				{filteredProducts.length === 0 ? (
+					<div style={{ padding: 16, color: '#475569' }}>No products match that search or filter.</div>
+				) : (
+					filteredProducts.map((p) => {
+						const productLine = lines[p.id] ?? { full_bottles: 0, leftover_ml: 0 };
+						const isCounted = productLine.full_bottles > 0 || productLine.leftover_ml > 0;
+						return (
+							<div key={p.id} style={{ borderBottom: '1px solid #eee', padding: 8 }}>
+								<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+									<div>
+										<div style={{ fontWeight: 600 }}>{p.name}</div>
+										<div style={{ fontSize: 12, color: '#64748b' }}>{p.sku ?? ''}</div>
+									</div>
+									<div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+										{isCounted ? (
+											<span style={{ background: '#16a34a', color: '#fff', borderRadius: 9999, padding: '2px 10px', fontSize: 12, fontWeight: 700 }}>
+												{p.count_mode === 'fractional'
+													? `${productLine.full_bottles} + ${productLine.leftover_ml}ml`
+													: `${productLine.full_bottles}`}
+											</span>
+										) : (
+											<span style={{ background: '#f1f5f9', color: '#475569', borderRadius: 9999, padding: '2px 10px', fontSize: 12, fontWeight: 700 }}>
+												Not counted
+											</span>
+										)}
+									</div>
+								</div>
+								{p.count_mode === 'fractional' ? (
+									<div>
+										<label>Full bottles: </label>
+										<input
+											type="number"
+											value={productLine.full_bottles}
+											onChange={(e) => updateLine(p.id, { full_bottles: parseInt(e.target.value || '0', 10) })}
+										/>
+										<label style={{ marginLeft: 8 }}>Leftover ml: </label>
+										<input
+											type="number"
+											value={productLine.leftover_ml}
+											onChange={(e) => updateLine(p.id, { leftover_ml: parseInt(e.target.value || '0', 10) })}
+										/>
+									</div>
+								) : (
+									<div>
+										<label>Count: </label>
+										<input
+											type="number"
+											value={productLine.full_bottles}
+											onChange={(e) => updateLine(p.id, { full_bottles: parseInt(e.target.value || '0', 10) })}
+										/>
+									</div>
+								)}
 							</div>
-						) : (
-							<div>
-								<label>Count: </label>
-								<input
-									type="number"
-									value={lines[p.id]?.full_bottles ?? 0}
-									onChange={(e) => updateLine(p.id, { full_bottles: parseInt(e.target.value || '0', 10) })}
-								/>
-							</div>
-						)}
-					</div>
-				))}
+						);
+					})
+				)}
 			</div>
 
 			<div style={{ marginTop: 12 }}>
