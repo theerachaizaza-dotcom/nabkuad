@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NabKuad — นับสต็อก</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000000;              /* ดำสนิทแบบ First Portfolio */
+    --card:#12181C;            /* การ์ดเทาเข้ม */
+    --card2:#1A2228;
+    --grad1:#141C20; --grad2:#0E1417;
+    --line:#232D33; --line2:#31404a;
+    --mint:#2FD196;            /* เขียว mint accent */
+    --mint-soft:rgba(47,209,150,.14);
+    --gold:#E6B053;
+    --text:#F2F5F6; --muted:#8A99A0; --muteder:#5B6B72;
+    --danger:#F0656B;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--bg)}
+  body{color:var(--text);font-family:"Sarabun",sans-serif;
+    max-width:480px;margin:0 auto;min-height:100vh;-webkit-font-smoothing:antialiased}
+  .mono{font-family:"IBM Plex Mono",monospace}
+
+  /* ---------- brand top ---------- */
+  .brandbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px}
+  .brand{font-size:21px;font-weight:800;letter-spacing:-.01em}
+  .brand .fp{color:#fff} .brand .p{color:var(--mint)}
+  .avatar{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line2);background:var(--card)}
+
+  /* ---------- sticky header ---------- */
+  header{position:sticky;top:0;z-index:50;background:var(--bg);padding:4px 16px 12px}
+  .loc-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .loc-pick{display:flex;align-items:center;gap:9px;background:var(--card2);
+    border:1px solid var(--line2);border-radius:14px;padding:9px 14px;font-size:15px;font-weight:700}
+  .loc-pick .pin{width:8px;height:8px;border-radius:50%;background:var(--mint);
+    box-shadow:0 0 8px var(--mint)}
+  .loc-pick .chev{color:var(--muted);font-size:12px;font-weight:400}
+  .sess{font-size:12px;color:var(--muted);text-align:right;line-height:1.35}
+  .sess b{color:var(--text);font-weight:700;display:block}
+
+  .search{position:relative;margin-bottom:12px}
+  .search input{width:100%;background:var(--card);border:1px solid var(--line2);color:var(--text);
+    border-radius:16px;padding:14px 16px 14px 44px;font-family:inherit;font-size:15.5px;font-weight:500}
+  .search input::placeholder{color:var(--muteder);font-weight:400}
+  .search .ico{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px}
+  .search .clr{position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--muted);
+    background:var(--card2);border:0;width:28px;height:28px;border-radius:50%;font-size:15px;display:none}
+
+  /* pill chips — สไตล์ 1D/1W/1M ของ First Portfolio */
+  .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;background:var(--card);border:1px solid transparent;color:var(--muted);
+    font-family:inherit;font-size:14px;font-weight:600;padding:9px 17px;border-radius:999px;
+    cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px}
+  .chip.on{background:var(--mint);color:#04241a;font-weight:700;
+    box-shadow:0 0 16px rgba(47,209,150,.4)}
+  .chip .cnt{font-family:"IBM Plex Mono";font-size:11px;opacity:.65;font-weight:600}
+  .chip.on .cnt{opacity:.8}
+  .chip.done:not(.on){color:var(--mint)}
+
+  /* ---------- value summary card (แบบ First Portfolio) ---------- */
+  .valuecard{margin:12px 14px 4px;background:linear-gradient(150deg,#13202A,#0C1417);
+    border:1px solid var(--line);border-radius:18px;padding:15px 17px;
+    display:flex;align-items:center;justify-content:space-between;
+    box-shadow:0 0 24px rgba(47,209,150,.07)}
+  .vc-label{font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:5px}
+  .vc-amount{font-family:"IBM Plex Mono";font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1}
+  .vc-amount #vcTotal{color:#fff}
+  .vc-sub{font-size:11.5px;color:var(--muted);margin-top:6px;font-family:"IBM Plex Mono";font-weight:500}
+  .vc-ring{--p:0;width:56px;height:56px;border-radius:50%;flex:0 0 auto;position:relative;
+    background:conic-gradient(var(--mint) calc(var(--p)*1%),var(--line) 0);display:grid;place-items:center}
+  .vc-ring::before{content:"";position:absolute;width:44px;height:44px;border-radius:50%;background:#0C1417}
+  .vc-ring span{position:relative;font-family:"IBM Plex Mono";font-size:13px;font-weight:700;color:var(--mint)}
+
+  /* ---------- category header + progress ---------- */
+  .cat-head{padding:16px 18px 12px;display:flex;align-items:flex-end;justify-content:space-between}
+  .cat-head .name{font-size:24px;font-weight:800;letter-spacing:-.02em}
+  .cat-head .prog{font-family:"IBM Plex Mono";font-size:13px;color:var(--muted);font-weight:600}
+  .cat-head .prog b{color:var(--mint)}
+  .bar{height:4px;background:var(--card2);margin:0 18px;border-radius:3px;overflow:hidden}
+  .bar > i{display:block;height:100%;background:var(--mint);width:20%;transition:.35s;
+    box-shadow:0 0 10px rgba(47,209,150,.5)}
+
+  /* ---------- product cards ---------- */
+  .list{padding:10px 14px 130px}
+  .row{background:linear-gradient(155deg,var(--grad1),var(--grad2));
+    border:1px solid var(--line);border-radius:16px;padding:12px 13px;margin-bottom:9px;transition:.15s}
+  .row.counted{border-color:rgba(47,209,150,.45);
+    background:linear-gradient(155deg,rgba(47,209,150,.07),var(--grad2))}
+  .row-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .row-name{font-size:15.5px;font-weight:700;line-height:1.25}
+  .row-sku{font-family:"IBM Plex Mono";font-size:11px;color:var(--muteder);margin-top:2px;font-weight:500}
+  .tag{flex:0 0 auto;font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .tag.no{background:var(--card2);color:var(--muteder)}
+  .tag.yes{background:var(--mint-soft);color:var(--mint)}
+
+  .inputs{display:flex;align-items:flex-end;gap:8px;margin-top:10px}
+  .field{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
+  .field label{font-size:10.5px;color:var(--muted);padding-left:2px;font-weight:600}
+  .field .box{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line2);
+    border-radius:11px;overflow:hidden}
+  .field .box:focus-within{border-color:var(--mint)}
+  .field button{width:36px;height:38px;border:0;background:transparent;color:var(--text);
+    font-size:21px;font-family:inherit;cursor:pointer;flex:0 0 auto;font-weight:400}
+  .field button:active{background:var(--mint);color:#04241a}
+  .field input{width:100%;min-width:0;text-align:center;background:transparent;border:0;color:var(--text);
+    font-family:"IBM Plex Mono";font-size:17px;font-weight:700;padding:8px 0;-moz-appearance:textfield}
+  .field input::-webkit-outer-spin-button,.field input::-webkit-inner-spin-button{-webkit-appearance:none}
+  .net{flex:0 0 auto;text-align:right;min-width:56px;padding-bottom:1px}
+  .net .n{font-family:"IBM Plex Mono";font-size:20px;font-weight:700;color:var(--mint);line-height:1}
+  .net .l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-top:2px}
+  .net .baht{font-family:"IBM Plex Mono";font-size:11px;color:var(--muteder);margin-top:3px;font-weight:600}
+  .unit-only .field.ml{display:none}
+  .field.ml .box{border-color:var(--line2)}
+  .field.ml .ml-in{font-size:18px;color:var(--mint)}
+  .field.ml .box:focus-within{border-color:var(--mint);box-shadow:0 0 0 3px var(--mint-soft)}
+  .unit-note{font-size:11px;color:var(--muteder);margin-top:9px}
+
+  .empty{text-align:center;color:var(--muteder);padding:60px 20px;font-size:15px}
+
+  /* ---------- sticky footer ---------- */
+  footer{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;
+    background:linear-gradient(transparent,var(--bg) 24%);padding:20px 14px 16px;z-index:40}
+  .foot-row{display:flex;gap:11px}
+  .next{flex:1;background:var(--card2);border:1px solid var(--line2);color:var(--text);
+    font-family:inherit;font-weight:700;font-size:15.5px;padding:16px;border-radius:16px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:8px}
+  .next b{color:var(--mint)}
+  .submit{flex:1;background:var(--mint);border:0;color:#04241a;font-family:inherit;font-weight:800;
+    font-size:15.5px;padding:16px;border-radius:16px;cursor:pointer;box-shadow:0 0 20px rgba(47,209,150,.35)}
+</style>
+</head>
+<body>
+
+<div class="brandbar">
+  <div class="brand"><span class="fp">Nab</span><span class="p">Kuad</span></div>
+  <div class="avatar"></div>
+</div>
+
+<header>
+  <div class="loc-bar">
+    <button class="loc-pick"><span class="pin"></span> Main Bar <span class="chev">▾</span></button>
+    <div class="sess"><b>รอบนับ 4 ก.ค.</b>Cost Control 1</div>
+  </div>
+  <div class="search">
+    <span class="ico">🔍</span>
+    <input id="q" placeholder="ค้นหาชื่อ หรือ SKU…" oninput="onSearch(this.value)">
+    <button class="clr" id="clr" onclick="clearSearch()">✕</button>
+  </div>
+  <div class="chips" id="chips"></div>
+</header>
+
+<div class="valuecard" id="valueCard">
+  <div class="vc-left">
+    <div class="vc-label">มูลค่าสต็อกที่นับแล้ว · Main Bar</div>
+    <div class="vc-amount">฿<span id="vcTotal">0</span></div>
+    <div class="vc-sub"><span id="vcItems">0</span> รายการ · <span id="vcNet">0.00</span> ขวด</div>
+  </div>
+  <div class="vc-ring" id="vcRing"><span id="vcPct">0%</span></div>
+</div>
+
+<div class="cat-head" id="catHead">
+  <div class="name" id="catName">Vodka</div>
+  <div class="prog" id="catProg"><b>0</b> / 0 นับแล้ว</div>
+</div>
+<div class="bar"><i id="progBar"></i></div>
+
+<div class="list" id="list"></div>
+
+<footer>
+  <div class="foot-row">
+    <button class="next" id="nextBtn" onclick="nextCat()">ถัดไป · <b id="nextName">Tequila</b> →</button>
+    <button class="submit" onclick="alert('ตัวอย่าง: ส่งยอด Main Bar เข้า DB')">ส่งยอด →</button>
+  </div>
+</footer>
+
+<script>
+const CATS=["Vodka","Tequila","Gin","Rum","Whiskey","Brandy & Cognac","Aperitif & Digestif",
+"Liqueurs","White Wine","Red Wine","Rose Wine","Sparkling Wine","Champagne - Large Format",
+"Champagne - Brut","Champagne - Rose","Champagne - Magnum","Beer & Cider","Water","Soft Drink",
+"Bitters","Coffee & Tea","Syrups - Frozen Puree","Syrups","Juices","Cigar & Cigarette"];
+const P=[
+ {c:"Vodka",n:"Belvedere 0.70 ml.",sku:"VDK-001",cap:700,m:"f",price:1580},
+ {c:"Vodka",n:"Grey Goose 0.75 ml.",sku:"VDK-007",cap:750,m:"f",price:1750},
+ {c:"Vodka",n:"Ketel One 0.75 ml.",sku:"VDK-014",cap:750,m:"f",price:1350},
+ {c:"Vodka",n:"Sminoff 1 L",sku:"VDK-015",cap:1000,m:"f",price:890},
+ {c:"Vodka",n:"Ciroc 0.75 ml.",sku:"VDK-013",cap:750,m:"f",price:1650},
+ {c:"Tequila",n:"Don Julio 1942 75ml",sku:"TEQ-005",cap:750,m:"f",price:8500},
+ {c:"Tequila",n:"Patron Silver 0.75",sku:"TEQ-002",cap:750,m:"f",price:2900},
+ {c:"Tequila",n:"Clase Azul Reposado 0.75",sku:"TEQ-008",cap:750,m:"f",price:9800},
+ {c:"Gin",n:"Bombay Sapphire 0.75",sku:"GIN-001",cap:750,m:"f",price:1150},
+ {c:"Gin",n:"Gin Mare 0.70",sku:"GIN-004",cap:700,m:"f",price:1850},
+ {c:"Gin",n:"Hendrick's 0.70",sku:"GIN-006",cap:700,m:"f",price:1950},
+ {c:"Beer & Cider",n:"Singha 320ml",sku:"BER-001",cap:320,m:"u",price:95},
+ {c:"Beer & Cider",n:"Corona 330ml",sku:"BER-002",cap:330,m:"u",price:140},
+ {c:"Beer & Cider",n:"Heineken 330ml",sku:"BER-003",cap:330,m:"u",price:120},
+ {c:"Soft Drink",n:"Coke Cola (can)",sku:"SFT-001",cap:330,m:"u",price:45},
+ {c:"Soft Drink",n:"Sprite (can)",sku:"SFT-004",cap:330,m:"u",price:45},
+];
+CATS.forEach(c=>{let k=P.filter(p=>p.c===c).length;for(let i=k;i<2;i++)
+  P.push({c,n:c+" ตัวอย่าง "+(i+1),sku:c.slice(0,3).toUpperCase()+"-0"+(i+1),cap:750,m:"f",price:0});});
+
+let cur="Vodka"; const state={}; P.forEach(p=>state[p.sku]={full:0,ml:0}); let searching="";
+const counted=p=>{const s=state[p.sku];return s.full>0||s.ml>0;};
+const catCount=c=>{const it=P.filter(p=>p.c===c);return[it.filter(counted).length,it.length];};
+const net=p=>{const s=state[p.sku];return s.full+s.ml/p.cap;};
+const value=p=>net(p)*(p.price||0);
+// รวมทั้งบาร์ (ทุกหมวด)
+function totals(){let baht=0,nb=0,items=0;P.forEach(p=>{if(counted(p)){baht+=value(p);nb+=net(p);items++;}});return{baht,nb,items};}
+function updateValueCard(){
+  const t=totals();
+  document.getElementById('vcTotal').textContent=Math.round(t.baht).toLocaleString();
+  document.getElementById('vcItems').textContent=t.items;
+  document.getElementById('vcNet').textContent=t.nb.toFixed(2);
+  const pct=Math.round(P.filter(counted).length/P.length*100);
+  const ring=document.getElementById('vcRing');ring.style.setProperty('--p',pct);
+  document.getElementById('vcPct').textContent=pct+'%';
+}
+
+function renderChips(){
+  const el=document.getElementById('chips');el.innerHTML='';
+  CATS.forEach(c=>{const[d,t]=catCount(c);const b=document.createElement('button');
+    b.className='chip'+(c===cur&&!searching?' on':'')+(d>0&&d===t?' done':'');
+    b.innerHTML=`${c} <span class="cnt">${d}/${t}</span>`;
+    b.onclick=()=>{searching="";document.getElementById('q').value="";document.getElementById('clr').style.display='none';
+      cur=c;render();b.scrollIntoView({inline:'center',behavior:'smooth',block:'nearest'});};
+    el.appendChild(b);});
+}
+function render(){
+  renderChips();
+  updateValueCard();
+  const items=searching?P.filter(p=>(p.n+p.sku).toLowerCase().includes(searching.toLowerCase())):P.filter(p=>p.c===cur);
+  document.getElementById('catHead').style.display=searching?'none':'flex';
+  document.querySelector('.bar').style.display=searching?'none':'block';
+  if(!searching){const[d,t]=catCount(cur);
+    document.getElementById('catName').textContent=cur;
+    document.getElementById('catProg').innerHTML=`<b>${d}</b> / ${t} นับแล้ว`;
+    document.getElementById('progBar').style.width=(t?d/t*100:0)+'%';
+    const idx=CATS.indexOf(cur);const nx=CATS[idx+1];
+    document.getElementById('nextBtn').style.display=nx?'flex':'none';
+    if(nx)document.getElementById('nextName').textContent=nx;}
+  const L=document.getElementById('list');L.innerHTML='';
+  if(!items.length){L.innerHTML='<div class="empty">ไม่พบสินค้า</div>';return;}
+  items.forEach(p=>{const s=state[p.sku];const isC=counted(p);const unit=p.m==='u';
+    const d=document.createElement('div');d.className='row'+(isC?' counted':'')+(unit?' unit-only':'');
+    d.innerHTML=`<div class="row-top"><div><div class="row-name">${p.n}</div>
+      <div class="row-sku">${p.sku} · ${unit?'นับเป็นชิ้น':p.cap+'ml'}</div></div>
+      <span class="tag ${isC?'yes':'no'}">${isC?'✓ นับแล้ว':'ยังไม่นับ'}</span></div>
+      <div class="inputs">
+        <div class="field"><label>${unit?'จำนวน':'ขวดเต็ม'}</label>
+          <div class="box"><button data-k="full" data-s="${p.sku}" data-d="-1">−</button>
+          <input inputmode="numeric" value="${s.full}" data-k="full" data-s="${p.sku}">
+          <button data-k="full" data-s="${p.sku}" data-d="1">+</button></div></div>
+        <div class="field ml"><label>เศษ (ml) · พิมพ์ได้เลย</label>
+          <div class="box"><button data-k="ml" data-s="${p.sku}" data-d="-50">−</button>
+          <input class="ml-in" inputmode="numeric" pattern="[0-9]*" value="${s.ml}" data-k="ml" data-s="${p.sku}" placeholder="0">
+          <button data-k="ml" data-s="${p.sku}" data-d="50">+</button></div></div>
+        <div class="net"><div class="n">${net(p).toFixed(2)}</div><div class="l">${unit?'ชิ้น':'net'}</div>${p.price?`<div class="baht">฿${Math.round(net(p)*p.price).toLocaleString()}</div>`:''}</div>
+      </div>${unit?'<div class="unit-note">สินค้าแบบ unit — นับเป็นชิ้น ไม่มีเศษ</div>':''}`;
+    L.appendChild(d);});
+  L.querySelectorAll('button[data-d]').forEach(b=>b.onclick=()=>chg(b.dataset.s,b.dataset.k,+b.dataset.d));
+  L.querySelectorAll('input[data-k]').forEach(inp=>{
+    // พิมพ์: อัปเดตค่า + net สด แต่ไม่ re-render (เคอร์เซอร์ไม่เด้ง พิมพ์ 456 ลื่น)
+    inp.oninput=()=>{let v=parseInt(inp.value||'0');if(isNaN(v)||v<0)v=0;
+      setValQuiet(inp.dataset.s,inp.dataset.k,v);};
+    // พิมพ์เสร็จ(ออกจากช่อง/Enter): ทบเศษ + re-render ให้เห็นผลเต็ม
+    inp.onblur=()=>render();
+    inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();inp.blur();}};
+  });
+}
+// อัปเดตค่าแบบเงียบ — ไม่ re-render เพื่อให้พิมพ์ตัวเลขหลายหลักได้ลื่น
+function setValQuiet(sku,k,v){
+  state[sku][k]=v;
+  const p=P.find(x=>x.sku===sku);
+  const card=document.querySelector(`.row [data-s="${sku}"]`)?.closest('.row');
+  const nEl=card?.querySelector('.net .n'); if(nEl)nEl.textContent=(state[sku].full+state[sku].ml/p.cap).toFixed(2);
+  const bEl=card?.querySelector('.net .baht'); if(bEl&&p.price)bEl.textContent='฿'+Math.round((state[sku].full+state[sku].ml/p.cap)*p.price).toLocaleString();
+  const tag=card?.querySelector('.tag');
+  if(tag){const on=state[sku].full>0||state[sku].ml>0;
+    tag.className='tag '+(on?'yes':'no');tag.textContent=on?'✓ นับแล้ว':'ยังไม่นับ';
+    card.classList.toggle('counted',on);}
+  updateValueCard();
+}
+function chg(sku,k,d){setVal(sku,k,Math.max(0,state[sku][k]+d));}
+function setVal(sku,k,v){const p=P.find(x=>x.sku===sku);state[sku][k]=v;
+  if(p.m==='f'&&k==='ml'){while(state[sku].ml>=p.cap){state[sku].ml-=p.cap;state[sku].full++;}}render();}
+function nextCat(){const i=CATS.indexOf(cur);if(CATS[i+1]){cur=CATS[i+1];window.scrollTo({top:0,behavior:'smooth'});render();}}
+function onSearch(v){searching=v.trim();document.getElementById('clr').style.display=v?'block':'none';render();}
+function clearSearch(){searching="";document.getElementById('q').value="";document.getElementById('clr').style.display='none';render();}
+render();
+</script>
+</body>
+</html>

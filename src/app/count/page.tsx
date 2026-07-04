@@ -10,6 +10,7 @@ type Product = {
 	count_mode: string;
 	category_id?: string | null;
 	capacity_ml?: number;
+	price_per_unit?: string | null;
 };
 
 type Session = {
@@ -136,6 +137,35 @@ export default function Page() {
 	const currentCategoryName = selectedCategory === ALL_CATEGORY ? 'สินค้าทั้งหมด' : selectedCategory;
 	const categoryNames = categories.map((category) => category.name);
 	const nextCategoryName = categoryNames[categoryNames.indexOf(selectedCategory) + 1] ?? null;
+	const locationName = locations.find((location) => location.id === locationId)?.name ?? 'Location';
+
+	const summary = useMemo(() => {
+		let totalValue = 0;
+		let totalNet = 0;
+		let countedItems = 0;
+
+		filteredProducts.forEach((product) => {
+			const effectiveLine = getEffectiveLine(product.id);
+			const netValue = getNetValue(product, effectiveLine);
+			if (netValue > 0) {
+				totalNet += netValue;
+			}
+			if (effectiveLine.full_bottles > 0 || effectiveLine.leftover_ml > 0) {
+				countedItems += 1;
+				const price = Number(product.price_per_unit ?? 0);
+				if (Number.isFinite(price) && price > 0) {
+					totalValue += netValue * price;
+				}
+			}
+		});
+
+		return {
+			totalValue,
+			totalNet,
+			countedItems,
+			progressPercent: filteredProducts.length ? Math.round((countedItems / filteredProducts.length) * 100) : 0,
+		};
+	}, [filteredProducts, drafts, lines]);
 
 	function updateLine(productId: string, patch: Partial<LineState>) {
 		setLines((prev) => ({
@@ -146,6 +176,16 @@ export default function Page() {
 				...patch,
 			},
 		}));
+	}
+
+	function getEffectiveLine(productId: string): LineState {
+		const base = lines[productId] ?? EMPTY_LINE;
+		const draft = drafts[productId];
+		if (!draft) return base;
+		return {
+			full_bottles: draft.full_bottles === '' ? base.full_bottles : Number.parseInt(draft.full_bottles || '0', 10),
+			leftover_ml: draft.leftover_ml === '' ? base.leftover_ml : Number.parseInt(draft.leftover_ml || '0', 10),
+		};
 	}
 
 	function updateDraft(productId: string, key: keyof LineState, value: string) {
@@ -192,6 +232,13 @@ export default function Page() {
 		const numericValue = Number.parseInt(digits || '0', 10);
 		const safeValue = Number.isFinite(numericValue) ? Math.max(0, numericValue) : 0;
 		updateLine(productId, { [key]: safeValue } as Partial<LineState>);
+	}
+
+	function handleInputKeyDown(event: React.KeyboardEvent<HTMLInputElement>, productId: string, key: keyof LineState) {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			event.currentTarget.blur();
+		}
 	}
 
 	function handleInputBlur(productId: string, key: keyof LineState) {
@@ -356,30 +403,40 @@ export default function Page() {
 				.cat-head .prog b { color: var(--mint); }
 				.bar { height: 4px; background: var(--card2); margin: 0 18px; border-radius: 3px; overflow: hidden; }
 				.bar > i { display: block; height: 100%; background: var(--mint); width: 0%; transition: 0.35s; box-shadow: 0 0 10px rgba(47, 209, 150, 0.5); }
+				.valuecard { margin: 12px 14px 4px; background: linear-gradient(150deg, #13202A, #0C1417); border: 1px solid var(--line); border-radius: 18px; padding: 15px 17px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 0 24px rgba(47, 209, 150, 0.07); }
+				.vc-label { font-size: 11.5px; color: var(--muted); font-weight: 600; margin-bottom: 5px; }
+				.vc-amount { font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+				.vc-sub { font-size: 11.5px; color: var(--muted); margin-top: 6px; font-family: 'IBM Plex Mono', monospace; font-weight: 500; }
+				.vc-ring { --p: 0; width: 56px; height: 56px; border-radius: 50%; flex: 0 0 auto; position: relative; background: conic-gradient(var(--mint) calc(var(--p) * 1%), var(--line) 0); display: grid; place-items: center; }
+				.vc-ring::before { content: ''; position: absolute; width: 44px; height: 44px; border-radius: 50%; background: #0C1417; }
+				.vc-ring span { position: relative; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: var(--mint); }
 				.list { padding: 10px 14px 130px; }
-				.row { background: linear-gradient(155deg, var(--grad1), var(--grad2)); border: 1px solid var(--line); border-radius: 20px; padding: 15px 16px; margin-bottom: 11px; }
+				.row { background: linear-gradient(155deg, var(--grad1), var(--grad2)); border: 1px solid var(--line); border-radius: 16px; padding: 12px 13px; margin-bottom: 9px; }
 				.row.counted { border-color: rgba(47, 209, 150, 0.45); background: linear-gradient(155deg, rgba(47, 209, 150, 0.07), var(--grad2)); }
 				.row-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-				.row-name { font-size: 16px; font-weight: 700; line-height: 1.3; }
-				.row-sku { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muteder); margin-top: 3px; font-weight: 500; }
-				.tag { flex: 0 0 auto; font-size: 11px; font-weight: 700; padding: 5px 11px; border-radius: 999px; white-space: nowrap; }
+				.row-name { font-size: 15.5px; font-weight: 700; line-height: 1.25; }
+				.row-sku { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muteder); margin-top: 2px; font-weight: 500; }
+				.tag { flex: 0 0 auto; font-size: 10.5px; font-weight: 700; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
 				.tag.no { background: var(--card2); color: var(--muteder); }
 				.tag.yes { background: var(--mint-soft); color: var(--mint); }
-				.inputs { display: flex; align-items: flex-end; gap: 9px; margin-top: 14px; }
-				.field { flex: 1; display: flex; flex-direction: column; gap: 5px; }
-				.field label { font-size: 11px; color: var(--muted); padding-left: 3px; font-weight: 600; }
-				.field .box { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--line2); border-radius: 13px; overflow: hidden; }
+				.inputs { display: flex; align-items: flex-end; gap: 8px; margin-top: 10px; }
+				.field { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+				.field label { font-size: 10.5px; color: var(--muted); padding-left: 2px; font-weight: 600; }
+				.field .box { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--line2); border-radius: 11px; overflow: hidden; }
 				.field .box:focus-within { border-color: var(--mint); }
-				.field button { width: 40px; height: 46px; border: 0; background: transparent; color: var(--text); font-size: 24px; font-family: inherit; cursor: pointer; flex: 0 0 auto; font-weight: 400; }
+				.field button { width: 36px; height: 38px; border: 0; background: transparent; color: var(--text); font-size: 21px; font-family: inherit; cursor: pointer; flex: 0 0 auto; font-weight: 400; }
 				.field button:active { background: var(--mint); color: #04241a; }
-				.field input { width: 100%; min-width: 0; text-align: center; background: transparent; border: 0; color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 19px; font-weight: 700; padding: 11px 0; -moz-appearance: textfield; }
+				.field input { width: 100%; min-width: 0; text-align: center; background: transparent; border: 0; color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 700; padding: 8px 0; -moz-appearance: textfield; }
 				.field input::-webkit-outer-spin-button, .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
-				.net { flex: 0 0 auto; text-align: right; min-width: 62px; padding-bottom: 2px; }
-				.net .n { font-family: 'IBM Plex Mono', monospace; font-size: 23px; font-weight: 700; color: var(--mint); line-height: 1; }
-				.net .l { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-top: 2px; }
+				.net { flex: 0 0 auto; text-align: right; min-width: 56px; padding-bottom: 1px; }
+				.net .n { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 700; color: var(--mint); line-height: 1; }
+				.net .l { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-top: 2px; }
+				.net .baht { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muteder); margin-top: 3px; font-weight: 600; }
 				.unit-only .field.ml { display: none; }
-				.unit-only .net { display: none; }
-				.unit-note { font-size: 11.5px; color: var(--muteder); margin-top: 11px; }
+				.field.ml .box { border-color: var(--line2); }
+				.field.ml .ml-in { font-size: 18px; color: var(--mint); }
+				.field.ml .box:focus-within { border-color: var(--mint); box-shadow: 0 0 0 3px var(--mint-soft); }
+				.unit-note { font-size: 11px; color: var(--muteder); margin-top: 9px; }
 				.empty { text-align: center; color: var(--muteder); padding: 60px 20px; font-size: 15px; }
 				footer { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: linear-gradient(transparent, var(--bg) 24%); padding: 20px 14px 16px; z-index: 40; }
 				.foot-row { display: flex; gap: 11px; }
@@ -458,6 +515,19 @@ export default function Page() {
 				</div>
 			</header>
 
+			<div className="valuecard">
+				<div>
+					<div className="vc-label">มูลค่าสต็อกที่นับแล้ว · {locationName}</div>
+					<div className="vc-amount">฿{summary.totalValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+					<div className="vc-sub">
+						{summary.countedItems} รายการ · {summary.totalNet.toFixed(2)} ขวด
+					</div>
+				</div>
+				<div className="vc-ring" style={{ ['--p' as string]: summary.progressPercent }}>
+					<span>{summary.progressPercent}%</span>
+				</div>
+			</div>
+
 			<div className="cat-head">
 				<div className="name">{currentCategoryName}</div>
 				<div className="prog">
@@ -515,6 +585,7 @@ export default function Page() {
 												value={getDraftValue(product.id, 'leftover_ml')}
 												onChange={(event) => handleInputChange(product.id, 'leftover_ml', event.target.value)}
 												onBlur={() => handleInputBlur(product.id, 'leftover_ml')}
+												onKeyDown={(event) => handleInputKeyDown(event, product.id, 'leftover_ml')}
 												placeholder="0"
 											/>
 											<button type="button" onClick={() => adjustLine(product.id, 'leftover_ml', 50)}>+</button>
@@ -522,8 +593,9 @@ export default function Page() {
 									</div>
 
 									<div className="net">
-										<div className="n">{getNetValue(product, line).toFixed(2)}</div>
+										<div className="n">{getNetValue(product, getEffectiveLine(product.id)).toFixed(2)}</div>
 										<div className="l">net</div>
+										{product.price_per_unit ? <div className="baht">฿{(getNetValue(product, getEffectiveLine(product.id)) * Number(product.price_per_unit)).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div> : null}
 									</div>
 								</div>
 								{unitOnly ? <div className="unit-note">สินค้าแบบ unit — นับเป็นชิ้น ไม่มีเศษ</div> : null}
