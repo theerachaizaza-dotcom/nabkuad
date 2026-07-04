@@ -403,47 +403,48 @@ export default function Page() {
 				.cat-head .prog b { color: var(--mint); }
 				.bar { height: 4px; background: var(--card2); margin: 0 18px; border-radius: 3px; overflow: hidden; }
 				.bar > i { display: block; height: 100%; background: var(--mint); width: 0%; transition: 0.35s; box-shadow: 0 0 10px rgba(47, 209, 150, 0.5); }
-				.valuecard { margin: 12px 14px 4px; background: linear-gradient(150deg, #13202A, #0C1417); border: 1px solid var(--line); border-radius: 18px; padding: 15px 17px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 0 24px rgba(47, 209, 150, 0.07); }
+				.valuecard { margin: 12px 14px 4px; background: linear-gradient(150deg, #13202A, #0C1417); border: 1px solid var(--line); border-radius: 18px; padding: 13px 14px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 0 24px rgba(47, 209, 150, 0.07); }
 				.vc-label { font-size: 11.5px; color: var(--muted); font-weight: 600; margin-bottom: 5px; }
-				.vc-amount { font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+				.vc-amount { font-family: 'IBM Plex Mono', monospace; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
 				.vc-sub { font-size: 11.5px; color: var(--muted); margin-top: 6px; font-family: 'IBM Plex Mono', monospace; font-weight: 500; }
-				.vc-ring { --p: 0; width: 56px; height: 56px; border-radius: 50%; flex: 0 0 auto; position: relative; background: conic-gradient(var(--mint) calc(var(--p) * 1%), var(--line) 0); display: grid; place-items: center; }
-				.vc-ring::before { content: ''; position: absolute; width: 44px; height: 44px; border-radius: 50%; background: #0C1417; }
-				.vc-ring span { position: relative; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: var(--mint); }
-				.list { padding: 10px 14px 130px; }
-				.row { background: linear-gradient(155deg, var(--grad1), var(--grad2)); border: 1px solid var(--line); border-radius: 16px; padding: 12px 13px; margin-bottom: 9px; }
+				.vc-ring { --p: 0; width: 54px; height: 54px; border-radius: 50%; flex: 0 0 auto; position: relative; background: conic-gradient(var(--mint) calc(var(--p) * 1%), var(--line) 0); display: grid; place-items: center; }
+				.vc-ring::before { content: ''; position: absolute; width: 42px; height: 42px; border-radius: 50%; background: #0C1417; }
+				.vc-ring span { position: relative; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 700; color: var(--mint); }
+				.list { padding: 8px 12px 130px; }
+				.row { background: linear-gradient(155deg, var(--grad1), var(--grad2)); border: 1px solid var(--line); border-radius: 14px; padding: 10px 11px; margin-bottom: 8px; }
 				.row.counted { border-color: rgba(47, 209, 150, 0.45); background: linear-gradient(155deg, rgba(47, 209, 150, 0.07), var(--grad2)); }
 				.row-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-				.row-name { font-size: 15.5px; font-weight: 700; line-height: 1.25; }
-				.row-sku { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muteder); margin-top: 2px; font-weight: 500; }
-				.tag { flex: 0 0 auto; font-size: 10.5px; font-weight: 700; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+				.row-name { font-size: 15px; font-weight: 700; line-height: 1.2; }
+				.row-sku { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--muteder); margin-top: 2px; font-weight: 500; }
+				.tag { flex: 0 0 auto; font-size: 10px; font-weight: 700; padding: 4px 9px; border-radius: 999px; white-space: nowrap; }
 				.tag.no { background: var(--card2); color: var(--muteder); }
 				.tag.yes { background: var(--mint-soft); color: var(--mint); }
-				.inputs { display: flex; align-items: flex-end; gap: 8px; margin-top: 10px; }
-				.field { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-				.field label { font-size: 10.5px; color: var(--muted); padding-left: 2px; font-weight: 600; }
-				.field .box { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--line2); border-radius: 11px; overflow: hidden; }
+				.inputs { display: flex; align-items: flex-end; gap: 8px; margin-top: 8px; }
+				.input-pair { display: flex; gap: 8px; flex: 1 1 auto; min-width: 0; }
+				.field { flex: 1 1 0; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+				.field label { font-size: 10px; color: var(--muted); padding-left: 2px; font-weight: 600; }
+				.field .box { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--line2); border-radius: 10px; overflow: hidden; }
 				.field .box:focus-within { border-color: var(--mint); }
-				.field button { width: 36px; height: 38px; border: 0; background: transparent; color: var(--text); font-size: 21px; font-family: inherit; cursor: pointer; flex: 0 0 auto; font-weight: 400; }
+				.field button { width: 30px; height: 32px; border: 0; background: transparent; color: var(--text); font-size: 19px; font-family: inherit; cursor: pointer; flex: 0 0 auto; font-weight: 400; }
 				.field button:active { background: var(--mint); color: #04241a; }
-				.field input { width: 100%; min-width: 0; text-align: center; background: transparent; border: 0; color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 700; padding: 8px 0; -moz-appearance: textfield; }
+				.field input { width: 100%; min-width: 0; text-align: center; background: transparent; border: 0; color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 700; padding: 6px 0; -moz-appearance: textfield; }
 				.field input::-webkit-outer-spin-button, .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
-				.net { flex: 0 0 auto; text-align: right; min-width: 56px; padding-bottom: 1px; }
-				.net .n { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 700; color: var(--mint); line-height: 1; }
+				.net { flex: 0 0 auto; text-align: right; min-width: 62px; padding-bottom: 1px; margin-left: auto; }
+				.net .n { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 700; color: var(--mint); line-height: 1; }
 				.net .l { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-top: 2px; }
-				.net .baht { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muteder); margin-top: 3px; font-weight: 600; }
+				.net .baht { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muteder); margin-top: 3px; font-weight: 600; }
 				.unit-only .field.ml { display: none; }
 				.field.ml .box { border-color: var(--line2); }
-				.field.ml .ml-in { font-size: 18px; color: var(--mint); }
-				.field.ml .box:focus-within { border-color: var(--mint); box-shadow: 0 0 0 3px var(--mint-soft); }
-				.unit-note { font-size: 11px; color: var(--muteder); margin-top: 9px; }
+				.field.ml .ml-in { font-size: 16px; color: var(--mint); }
+				.field.ml .box:focus-within { border-color: var(--mint); box-shadow: 0 0 0 2px var(--mint-soft); }
+				.unit-note { font-size: 10.5px; color: var(--muteder); margin-top: 8px; }
 				.empty { text-align: center; color: var(--muteder); padding: 60px 20px; font-size: 15px; }
 				footer { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: linear-gradient(transparent, var(--bg) 24%); padding: 20px 14px 16px; z-index: 40; }
 				.foot-row { display: flex; gap: 11px; }
 				.next { flex: 1; background: var(--card2); border: 1px solid var(--line2); color: var(--text); font-family: inherit; font-weight: 700; font-size: 15.5px; padding: 16px; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
 				.next b { color: var(--mint); }
 				.submit { flex: 1; background: var(--mint); border: 0; color: #04241a; font-family: inherit; font-weight: 800; font-size: 15.5px; padding: 16px; border-radius: 16px; cursor: pointer; box-shadow: 0 0 20px rgba(47, 209, 150, 0.35); }
-				@media (max-width: 480px) { .inputs { flex-direction: column; align-items: stretch; } .net { text-align: left; min-width: 0; } }
+				@media (max-width: 480px) { .inputs { gap: 6px; } .input-pair { gap: 6px; } .net { min-width: 58px; } }
 			`}</style>
 
 			<div className="brandbar">
@@ -558,37 +559,39 @@ export default function Page() {
 								</div>
 
 								<div className="inputs">
-									<div className="field">
-										<label>{unitOnly ? 'จำนวน' : 'ขวดเต็ม'}</label>
-										<div className="box">
-											<button type="button" onClick={() => adjustLine(product.id, 'full_bottles', -1)}>-</button>
-											<input
-												type="number"
-												inputMode="numeric"
-												value={line.full_bottles}
-												onChange={(event) => handleInputChange(product.id, 'full_bottles', event.target.value)}
-											/>
-											<button type="button" onClick={() => adjustLine(product.id, 'full_bottles', 1)}>+</button>
+									<div className="input-pair">
+										<div className="field">
+											<label>{unitOnly ? 'จำนวน' : 'ขวดเต็ม'}</label>
+											<div className="box">
+												<button type="button" onClick={() => adjustLine(product.id, 'full_bottles', -1)}>-</button>
+												<input
+													type="number"
+													inputMode="numeric"
+													value={line.full_bottles}
+													onChange={(event) => handleInputChange(product.id, 'full_bottles', event.target.value)}
+												/>
+												<button type="button" onClick={() => adjustLine(product.id, 'full_bottles', 1)}>+</button>
+											</div>
 										</div>
-									</div>
 
-									<div className="field ml">
-										<label>เศษ (ml) · พิมพ์ได้เลย</label>
-										<div className="box">
-											<button type="button" onClick={() => adjustLine(product.id, 'leftover_ml', -50)}>-</button>
-											<input
-												className="ml-in"
-												type="number"
-												inputMode="numeric"
-												autoComplete="off"
-												pattern="[0-9]*"
-												value={getDraftValue(product.id, 'leftover_ml')}
-												onChange={(event) => handleInputChange(product.id, 'leftover_ml', event.target.value)}
-												onBlur={() => handleInputBlur(product.id, 'leftover_ml')}
-												onKeyDown={(event) => handleInputKeyDown(event, product.id, 'leftover_ml')}
-												placeholder="0"
-											/>
-											<button type="button" onClick={() => adjustLine(product.id, 'leftover_ml', 50)}>+</button>
+										<div className="field ml">
+											<label>เศษ (ml)</label>
+											<div className="box">
+												<button type="button" onClick={() => adjustLine(product.id, 'leftover_ml', -50)}>-</button>
+												<input
+													className="ml-in"
+													type="number"
+													inputMode="numeric"
+													autoComplete="off"
+													pattern="[0-9]*"
+													value={getDraftValue(product.id, 'leftover_ml')}
+													onChange={(event) => handleInputChange(product.id, 'leftover_ml', event.target.value)}
+													onBlur={() => handleInputBlur(product.id, 'leftover_ml')}
+													onKeyDown={(event) => handleInputKeyDown(event, product.id, 'leftover_ml')}
+													placeholder="0"
+												/>
+												<button type="button" onClick={() => adjustLine(product.id, 'leftover_ml', 50)}>+</button>
+											</div>
 										</div>
 									</div>
 
