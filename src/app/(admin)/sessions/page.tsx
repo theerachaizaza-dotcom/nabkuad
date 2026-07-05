@@ -4,6 +4,8 @@ import type { Metadata } from 'next';
 import { IBM_Plex_Mono, Sarabun } from 'next/font/google';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import type { Session } from './types';
+import DeleteSessionButton from './DeleteSessionButton';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export const metadata: Metadata = {
   title: 'Sessions | Admin',
@@ -97,24 +99,42 @@ async function closeSession(formData: FormData): Promise<void> {
   revalidatePath('/sessions');
 }
 
+async function deleteSession(sessionId: string): Promise<void> {
+  'use server';
+
+  if (!sessionId) return;
+
+  const { data: existing, error: fetchError } = await (supabaseAdmin.from('count_sessions') as any)
+    .select('id, status')
+    .eq('id', sessionId)
+    .single();
+
+  if (fetchError) {
+    throw new Error(fetchError.message);
+  }
+
+  if (existing?.status === 'open') {
+    throw new Error('ห้ามลบรอบที่กำลังเปิดอยู่ — ปิดรอบก่อนถึงจะลบได้');
+  }
+
+  // count_lines และ location_submissions ผูก session_id ไว้แบบ ON DELETE CASCADE
+  // (ดู supabase/migrations/0001_init.sql) ลบ session ตรงๆ ได้เลย
+  const { error } = await supabaseAdmin.from('count_sessions').delete().eq('id', sessionId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath('/sessions');
+  revalidatePath('/dashboard');
+}
+
 export default async function SessionsPage() {
   const sessions = await getSessions();
 
   return (
     <div className={`sessions-shell ${sarabun.className}`}>
       <style>{`
-        :root {
-          --bg: #000000;
-          --card: #12181C;
-          --card2: #1A2228;
-          --line: #232D33;
-          --line2: #31404a;
-          --mint: #2FD196;
-          --mint-soft: rgba(47, 209, 150, 0.16);
-          --text: #F2F5F6;
-          --muted: #8A99A0;
-          --muteder: #5B6B72;
-        }
         * { box-sizing: border-box; }
         body { background: var(--bg); color: var(--text); }
         .mono { font-family: ${ibmPlexMono.style.fontFamily}; }
@@ -125,15 +145,16 @@ export default async function SessionsPage() {
           padding: 20px 14px 40px;
         }
         .brandbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .brandbar-right { display: flex; align-items: center; gap: 10px; }
         .brand { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; }
-        .brand .fp { color: #fff; }
+        .brand .fp { color: var(--text); }
         .brand .p { color: var(--mint); }
         .panel {
-          background: linear-gradient(155deg, #141C20, #0E1417);
+          background: linear-gradient(155deg, var(--grad1), var(--grad2));
           border: 1px solid var(--line);
           border-radius: 20px;
           padding: 16px;
-          box-shadow: 0 0 24px rgba(47, 209, 150, 0.06);
+          box-shadow: var(--card-shadow);
         }
         .panel + .panel { margin-top: 12px; }
         .section-title { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px; }
@@ -177,6 +198,7 @@ export default async function SessionsPage() {
         .session-list { display: grid; gap: 10px; }
         .session-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 13px; }
         .session-top { display: flex; justify-content: space-between; align-items: start; gap: 10px; }
+        .session-actions { display: flex; align-items: flex-start; gap: 8px; }
         .session-name { font-size: 16px; font-weight: 800; }
         .session-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; color: var(--muted); font-size: 12px; }
         .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: capitalize; }
@@ -195,7 +217,10 @@ export default async function SessionsPage() {
           <span className="fp">Nab</span>
           <span className="p">Kuad</span>
         </div>
-        <div className="subtle mono">Admin · Sessions</div>
+        <div className="brandbar-right">
+          <div className="subtle mono">Admin · Sessions</div>
+          <ThemeToggle />
+        </div>
       </div>
 
       <div className="panel">
@@ -243,14 +268,22 @@ export default async function SessionsPage() {
                     <span className="mono-text">{session.count_date}</span>
                   </div>
                 </div>
-                {session.status === 'open' ? (
-                  <form action={closeSession}>
-                    <input type="hidden" name="session_id" value={session.id} />
-                    <button type="submit" className="ghost-btn">ปิดรอบ</button>
-                  </form>
-                ) : (
-                  <span className="status-pill closed">closed</span>
-                )}
+                <div className="session-actions">
+                  {session.status === 'open' ? (
+                    <form action={closeSession}>
+                      <input type="hidden" name="session_id" value={session.id} />
+                      <button type="submit" className="ghost-btn">ปิดรอบ</button>
+                    </form>
+                  ) : (
+                    <span className="status-pill closed">closed</span>
+                  )}
+                  <DeleteSessionButton
+                    sessionId={session.id}
+                    sessionName={session.name}
+                    canDelete={session.status !== 'open'}
+                    deleteSession={deleteSession}
+                  />
+                </div>
               </div>
               <div className="session-meta">
                 <span>สร้าง: {new Date(session.created_at).toLocaleString()}</span>

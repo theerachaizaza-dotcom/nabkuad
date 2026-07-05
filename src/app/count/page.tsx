@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { IBM_Plex_Mono, Sarabun } from 'next/font/google';
+import ThemeToggle from '@/components/ThemeToggle';
 
 type Product = {
 	id: string;
@@ -381,20 +382,6 @@ export default function Page() {
 	return (
 		<div className={`count-shell ${sarabun.className}`}>
 			<style jsx global>{`
-				:root {
-					--bg: #000000;
-					--card: #12181C;
-					--card2: #1A2228;
-					--grad1: #141C20;
-					--grad2: #0E1417;
-					--line: #232D33;
-					--line2: #31404a;
-					--mint: #2FD196;
-					--mint-soft: rgba(47, 209, 150, 0.14);
-					--text: #F2F5F6;
-					--muted: #8A99A0;
-					--muteder: #5B6B72;
-				}
 				* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 				body { background: var(--bg); color: var(--text); font-family: 'Sarabun', sans-serif; }
 				.mono { font-family: ${ibmPlexMono.style.fontFamily}; }
@@ -408,7 +395,7 @@ export default function Page() {
 				}
 				.brandbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px 12px; }
 				.brand { font-size: 21px; font-weight: 800; letter-spacing: -0.01em; }
-				.brand .fp { color: #fff; }
+				.brand .fp { color: var(--text); }
 				.brand .p { color: var(--mint); }
 				.top-actions { display: flex; align-items: center; gap: 8px; }
 				.reset-btn { background: transparent; border: 1px solid var(--line2); color: var(--muted); padding: 7px 10px; border-radius: 999px; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
@@ -437,12 +424,12 @@ export default function Page() {
 				.cat-head .prog b { color: var(--mint); }
 				.bar { height: 4px; background: var(--card2); margin: 0 18px; border-radius: 3px; overflow: hidden; }
 				.bar > i { display: block; height: 100%; background: var(--mint); width: 0%; transition: 0.35s; box-shadow: 0 0 10px rgba(47, 209, 150, 0.5); }
-				.valuecard { margin: 12px 14px 4px; background: linear-gradient(150deg, #13202A, #0C1417); border: 1px solid var(--line); border-radius: 18px; padding: 13px 14px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 0 24px rgba(47, 209, 150, 0.07); }
+				.valuecard { margin: 12px 14px 4px; background: linear-gradient(150deg, var(--grad1), var(--grad2)); border: 1px solid var(--line); border-radius: 18px; padding: 13px 14px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--card-shadow); }
 				.vc-label { font-size: 11.5px; color: var(--muted); font-weight: 600; margin-bottom: 5px; }
 				.vc-amount { font-family: 'IBM Plex Mono', monospace; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
 				.vc-sub { font-size: 11.5px; color: var(--muted); margin-top: 6px; font-family: 'IBM Plex Mono', monospace; font-weight: 500; }
 				.vc-ring { --p: 0; width: 54px; height: 54px; border-radius: 50%; flex: 0 0 auto; position: relative; background: conic-gradient(var(--mint) calc(var(--p) * 1%), var(--line) 0); display: grid; place-items: center; }
-				.vc-ring::before { content: ''; position: absolute; width: 42px; height: 42px; border-radius: 50%; background: #0C1417; }
+				.vc-ring::before { content: ''; position: absolute; width: 42px; height: 42px; border-radius: 50%; background: var(--grad2); }
 				.vc-ring span { position: relative; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 700; color: var(--mint); }
 				.list { padding: 8px 12px 130px; }
 				.row { background: linear-gradient(155deg, var(--grad1), var(--grad2)); border: 1px solid var(--line); border-radius: 14px; padding: 10px 11px; margin-bottom: 8px; }
@@ -490,6 +477,7 @@ export default function Page() {
 					<button className="reset-btn" type="button" onClick={() => resetCounts()} disabled={loading || !locationId || !sessionId}>
 						รีเซ็ตยอด
 					</button>
+					<ThemeToggle />
 					<div className="avatar" />
 				</div>
 			</div>

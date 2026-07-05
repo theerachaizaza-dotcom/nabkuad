@@ -1,6 +1,19 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
+
+const THEME_INIT_SCRIPT = `
+(function () {
+  try {
+    var stored = window.localStorage.getItem('nabkuad-theme');
+    var theme = stored === 'light' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = theme;
+  } catch (e) {
+    document.documentElement.dataset.theme = 'dark';
+  }
+})();
+`;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,8 +39,16 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        <Script id="theme-init" strategy="beforeInteractive">
+          {THEME_INIT_SCRIPT}
+        </Script>
+      </head>
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }

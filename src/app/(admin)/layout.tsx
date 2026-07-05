@@ -13,18 +13,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <div className={`admin-shell ${sarabun.className}`}>
       <style>{`
-        :root {
-          --bg: #000000;
-          --card: #12181c;
-          --card2: #1a2228;
-          --line: #232d33;
-          --line2: #31404a;
-          --mint: #2fd196;
-          --mint-soft: rgba(47, 209, 150, 0.16);
-          --text: #f2f5f6;
-          --muted: #8a99a0;
-          --muteder: #5b6b72;
-        }
         .admin-shell {
           min-height: 100vh;
           background: var(--bg);
