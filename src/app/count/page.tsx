@@ -347,6 +347,37 @@ export default function Page() {
 		}
 	}
 
+	async function resetCounts() {
+		if (!sessionId || !locationId) return alert('Missing session or location');
+		const locationLabel = locations.find((location) => location.id === locationId)?.name ?? 'สถานที่นี้';
+		const firstConfirm = window.confirm(`ล้างยอดทั้งหมดของ ${locationLabel}?\nยกเลิกไม่ได้`);
+		if (!firstConfirm) return;
+		const secondConfirm = window.confirm(`ยืนยันอีกครั้งเพื่อลบยอดทั้งหมดของ ${locationLabel}`);
+		if (!secondConfirm) return;
+
+		setLoading(true);
+		const res = await fetch(`/api/v1/sessions/${sessionId}/counts`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				location_id: locationId,
+				lines: products.map((product) => ({ product_id: product.id, full_bottles: 0, leftover_ml: 0 })),
+			}),
+		});
+		setLoading(false);
+
+		if (!res.ok) {
+			const txt = await res.text();
+			alert('Reset failed: ' + txt);
+			return;
+		}
+
+		const zeroLines = Object.fromEntries(products.map((product) => [product.id, { full_bottles: 0, leftover_ml: 0 }]));
+		setLines(zeroLines as Record<string, LineState>);
+		setDrafts(Object.fromEntries(products.map((product) => [product.id, { full_bottles: '0', leftover_ml: '0' }])) as Record<string, DraftState>);
+		alert('ล้างยอดแล้ว');
+	}
+
 	return (
 		<div className={`count-shell ${sarabun.className}`}>
 			<style jsx global>{`
@@ -379,6 +410,9 @@ export default function Page() {
 				.brand { font-size: 21px; font-weight: 800; letter-spacing: -0.01em; }
 				.brand .fp { color: #fff; }
 				.brand .p { color: var(--mint); }
+				.top-actions { display: flex; align-items: center; gap: 8px; }
+				.reset-btn { background: transparent; border: 1px solid var(--line2); color: var(--muted); padding: 7px 10px; border-radius: 999px; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+				.reset-btn:active { border-color: var(--mint); color: var(--text); }
 				.avatar { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--line2); background: var(--card); }
 				header { position: sticky; top: 0; z-index: 50; background: var(--bg); padding: 4px 16px 12px; }
 				.loc-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 10px; }
@@ -452,7 +486,12 @@ export default function Page() {
 					<span className="fp">Nab</span>
 					<span className="p">Kuad</span>
 				</div>
-				<div className="avatar" />
+				<div className="top-actions">
+					<button className="reset-btn" type="button" onClick={() => resetCounts()} disabled={loading || !locationId || !sessionId}>
+						รีเซ็ตยอด
+					</button>
+					<div className="avatar" />
+				</div>
 			</div>
 
 			<header>

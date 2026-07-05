@@ -1,11 +1,15 @@
 import { cache } from 'react';
 import { revalidatePath } from 'next/cache';
 import type { Metadata } from 'next';
+import { IBM_Plex_Mono, Sarabun } from 'next/font/google';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
 export const metadata: Metadata = {
   title: 'Dashboard | Admin',
 };
+
+const sarabun = Sarabun({ subsets: ['latin', 'thai'], weight: ['400', '500', '600', '700', '800'] });
+const ibmPlexMono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['500', '600', '700'] });
 
 type CurrentSession = {
   id: string;
@@ -80,19 +84,60 @@ async function closeSession(formData: FormData): Promise<void> {
   revalidatePath('/sessions');
 }
 
+const dashboardStyles = `
+  .dash-shell { min-height: 100vh; background: var(--bg); color: var(--text); padding: 20px 14px 40px; }
+  .dash-shell .mono { font-family: var(--mono-font); }
+  .brandbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .brand { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; }
+  .brand .fp { color: #fff; }
+  .brand .p { color: var(--mint); }
+  .panel {
+    background: linear-gradient(155deg, #141C20, #0E1417);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 0 0 24px rgba(47, 209, 150, 0.06);
+  }
+  .panel + .panel { margin-top: 12px; }
+  .section-title { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px; }
+  .subtle { color: var(--muted); font-size: 13px; }
+  .row-between { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+  .action-btn {
+    background: var(--mint); color: #04241a; border: 0; border-radius: 999px;
+    padding: 10px 14px; font-weight: 800; cursor: pointer; box-shadow: 0 0 16px rgba(47, 209, 150, 0.3);
+  }
+  .stat-grid { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 14px; }
+  .stat-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
+  .stat-card .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .stat-card .value { font-family: var(--mono-font); font-size: 24px; font-weight: 700; margin-top: 6px; }
+  .loc-list { display: grid; gap: 8px; margin-top: 4px; }
+  .loc-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .loc-name { font-weight: 700; }
+  .loc-code { font-family: var(--mono-font); font-size: 11px; color: var(--muteder); margin-top: 2px; }
+  .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: capitalize; }
+  .status-pill.submitted { background: var(--mint-soft); color: var(--mint); }
+  .status-pill.pending { background: var(--card2); color: var(--muted); }
+  .loc-time { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  @media (min-width: 640px) {
+    .dash-shell { padding: 28px 24px 48px; }
+  }
+`;
+
 export default async function DashboardPage() {
   const session = await getCurrentSession();
 
   if (!session) {
     return (
-      <div className="space-y-6">
-        <div>
-          <p className="text-sm text-slate-500">Monitoring</p>
-          <h2 className="text-2xl font-semibold text-slate-900">Location submission status</h2>
+      <div className={`dash-shell ${sarabun.className}`}>
+        <style>{`
+          :root { --mono-font: ${ibmPlexMono.style.fontFamily}; }
+          ${dashboardStyles}
+        `}</style>
+        <div className="brandbar">
+          <div className="brand"><span className="fp">Nab</span><span className="p">Kuad</span></div>
+          <div className="subtle mono">Admin · Monitoring</div>
         </div>
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 text-slate-700">
-          No open session found. Create a new count session first.
-        </div>
+        <div className="panel subtle">ไม่มีรอบนับที่เปิดอยู่ — สร้างรอบนับใหม่ที่หน้า Sessions ก่อน</div>
       </div>
     );
   }
@@ -102,68 +147,64 @@ export default async function DashboardPage() {
   const pendingCount = locationStatuses.length - submittedCount;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="text-sm text-slate-500">Monitoring</p>
-        <h2 className="text-2xl font-semibold text-slate-900">Location submission status</h2>
-        <p className="text-sm text-slate-500">Current session: {session.name} · {session.count_date}</p>
+    <div className={`dash-shell ${sarabun.className}`}>
+      <style>{`
+        :root { --mono-font: ${ibmPlexMono.style.fontFamily}; }
+        ${dashboardStyles}
+      `}</style>
+
+      <div className="brandbar">
+        <div className="brand"><span className="fp">Nab</span><span className="p">Kuad</span></div>
+        <div className="subtle mono">Admin · Monitoring</div>
       </div>
 
-      <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-1">
-            <p className="text-sm text-slate-500">Open session</p>
-            <p className="text-lg font-semibold text-slate-900">{session.name}</p>
-            <p className="text-sm text-slate-500">{session.count_date}</p>
+      <div className="panel">
+        <div className="section-title">Open session</div>
+        <div className="row-between">
+          <div>
+            <p style={{ fontWeight: 800, fontSize: 16 }}>{session.name}</p>
+            <p className="subtle">{session.count_date}</p>
           </div>
-          <form action={closeSession} className="flex gap-3">
+          <form action={closeSession}>
             <input type="hidden" name="session_id" value={session.id} />
-            <button
-              type="submit"
-              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
-            >
-              Close session
-            </button>
+            <button type="submit" className="action-btn">Close session</button>
           </form>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <p className="text-xs text-slate-500">Submitted</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-900">{submittedCount}</p>
+        <div className="stat-grid">
+          <div className="stat-card">
+            <div className="label">Submitted</div>
+            <div className="value">{submittedCount}</div>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <p className="text-xs text-slate-500">Pending</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-900">{pendingCount}</p>
+          <div className="stat-card">
+            <div className="label">Pending</div>
+            <div className="value">{pendingCount}</div>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <p className="text-xs text-slate-500">Locations total</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-900">{locationStatuses.length}</p>
+          <div className="stat-card">
+            <div className="label">Locations</div>
+            <div className="value">{locationStatuses.length}</div>
           </div>
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white p-6">
-        <table className="min-w-full border-separate border-spacing-0 text-sm">
-          <thead className="bg-slate-50 text-slate-500">
-            <tr>
-              <th className="border-b border-slate-200 px-4 py-3 text-left font-medium">Location</th>
-              <th className="border-b border-slate-200 px-4 py-3 text-left font-medium">Code</th>
-              <th className="border-b border-slate-200 px-4 py-3 text-left font-medium">Status</th>
-              <th className="border-b border-slate-200 px-4 py-3 text-left font-medium">Submitted at</th>
-            </tr>
-          </thead>
-          <tbody>
-            {locationStatuses.map((status) => (
-              <tr key={status.id} className="border-b border-slate-100 last:border-none">
-                <td className="px-4 py-4 text-slate-900">{status.location_name}</td>
-                <td className="px-4 py-4 text-slate-700">{status.location_code}</td>
-                <td className="px-4 py-4 text-slate-700 capitalize">{status.status}</td>
-                <td className="px-4 py-4 text-slate-700">{status.submitted_at ? new Date(status.submitted_at).toLocaleString() : '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="panel">
+        <div className="section-title">Location status</div>
+        <div className="loc-list">
+          {locationStatuses.map((status) => (
+            <div key={status.id} className="loc-card">
+              <div>
+                <div className="loc-name">{status.location_name}</div>
+                <div className="loc-code mono">{status.location_code}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <span className={`status-pill ${status.status}`}>{status.status}</span>
+                <div className="loc-time mono">
+                  {status.submitted_at ? new Date(status.submitted_at).toLocaleString() : '—'}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,9 @@
 import type { Metadata } from 'next';
 import { ReactNode } from 'react';
+import { Sarabun } from 'next/font/google';
+import AdminNav from './AdminNav';
+
+const sarabun = Sarabun({ subsets: ['latin', 'thai'], weight: ['400', '500', '600', '700', '800'] });
 
 export const metadata: Metadata = {
   title: 'NabKuad Admin',
@@ -7,26 +11,30 @@ export const metadata: Metadata = {
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <p className="text-sm text-slate-500">Admin Dashboard</p>
-            <h1 className="text-3xl font-semibold tracking-tight">Master Data</h1>
-          </div>          <nav className="flex flex-wrap gap-3">
-            <a href="/dashboard" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
-              Monitoring
-            </a>
-            <a href="/sessions" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
-              Sessions
-            </a>
-            <a href="/products" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
-              Products
-            </a>
-          </nav>
-        </div>
-        <div className="rounded-3xl border border-slate-200 bg-white shadow-sm p-6">{children}</div>
-      </div>
+    <div className={`admin-shell ${sarabun.className}`}>
+      <style>{`
+        :root {
+          --bg: #000000;
+          --card: #12181c;
+          --card2: #1a2228;
+          --line: #232d33;
+          --line2: #31404a;
+          --mint: #2fd196;
+          --mint-soft: rgba(47, 209, 150, 0.16);
+          --text: #f2f5f6;
+          --muted: #8a99a0;
+          --muteder: #5b6b72;
+        }
+        .admin-shell {
+          min-height: 100vh;
+          background: var(--bg);
+        }
+        .admin-content {
+          padding-bottom: 88px;
+        }
+      `}</style>
+      <div className="admin-content">{children}</div>
+      <AdminNav />
     </div>
   );
 }
