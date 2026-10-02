@@ -6,6 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin';
 import type { Session } from './types';
 import DeleteSessionButton from './DeleteSessionButton';
 import ThemeToggle from '@/components/ThemeToggle';
+import BrandLogo from '@/components/BrandLogo';
 
 export const metadata: Metadata = {
   title: 'Sessions | Admin',
@@ -213,10 +214,7 @@ export default async function SessionsPage() {
       `}</style>
 
       <div className="brandbar">
-        <div className="brand">
-          <span className="fp">Nab</span>
-          <span className="p">Kuad</span>
-        </div>
+        <BrandLogo />
         <div className="brandbar-right">
           <div className="subtle mono">Admin · Sessions</div>
           <ThemeToggle />

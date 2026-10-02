@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { IBM_Plex_Mono, Sarabun } from 'next/font/google';
 import ThemeToggle from '@/components/ThemeToggle';
+import BrandLogo from '@/components/BrandLogo';
 
 type Product = {
 	id: string;
@@ -479,10 +480,7 @@ export default function Page() {
 			`}</style>
 
 			<div className="brandbar">
-				<div className="brand">
-					<span className="fp">Nab</span>
-					<span className="p">Kuad</span>
-				</div>
+				<BrandLogo />
 				<div className="top-actions">
 					<button className="reset-btn" type="button" onClick={() => resetCounts()} disabled={loading || !locationId || !sessionId}>
 						รีเซ็ตยอด

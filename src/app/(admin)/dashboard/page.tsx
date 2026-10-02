@@ -5,6 +5,7 @@ import { IBM_Plex_Mono, Sarabun } from 'next/font/google';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import ThemeToggle from '@/components/ThemeToggle';
 import AutoRefresh from './AutoRefresh';
+import BrandLogo from '@/components/BrandLogo';
 
 export const metadata: Metadata = {
   title: 'Dashboard | Admin',
@@ -152,7 +153,7 @@ export default async function DashboardPage() {
           ${dashboardStyles}
         `}</style>
         <div className="brandbar">
-          <div className="brand"><span className="fp">Nab</span><span className="p">Kuad</span></div>
+          <BrandLogo />
           <div className="brandbar-right">
             <div className="subtle mono">Admin · Monitoring</div>
             <ThemeToggle />
@@ -176,7 +177,7 @@ export default async function DashboardPage() {
       `}</style>
 
       <div className="brandbar">
-        <div className="brand"><span className="fp">Nab</span><span className="p">Kuad</span></div>
+        <BrandLogo />
         <div className="subtle mono">Admin · Monitoring</div>
       </div>
 

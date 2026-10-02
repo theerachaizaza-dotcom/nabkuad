@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Category, Product } from './types';
 import { IBM_Plex_Mono, Sarabun } from 'next/font/google';
 import ThemeToggle from '@/components/ThemeToggle';
+import BrandLogo from '@/components/BrandLogo';
 
 const sarabun = Sarabun({ subsets: ['latin', 'thai'], weight: ['400', '500', '600', '700', '800'] });
 const ibmPlexMono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['500', '600', '700'] });
@@ -93,6 +94,10 @@ export default function ProductsAdminPage({ products, categories, createProduct,
       <style jsx global>{`
         body { background: var(--bg); color: var(--text); }
         .mono { font-family: ${ibmPlexMono.style.fontFamily}; }
+        .brandbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .brand { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; }
+        .brand .fp { color: var(--text); }
+        .brand .p { color: var(--mint); }
         .bg-page { background: var(--bg); }
         .fg { color: var(--text); }
         .fg-muted { color: var(--muted); }
@@ -115,6 +120,11 @@ export default function ProductsAdminPage({ products, categories, createProduct,
       `}</style>
 
       <div className="mx-auto flex max-w-6xl flex-col gap-4">
+        <div className="brandbar">
+          <BrandLogo />
+          <div className="fg-muted mono" style={{ fontSize: 13 }}>Admin · Products</div>
+        </div>
+
         <div className="panel flex flex-col gap-4 p-4 sm:flex-row sm:items-end sm:justify-between sm:p-5">
           <div>
             <p className="text-sm fg-muted">Products</p>

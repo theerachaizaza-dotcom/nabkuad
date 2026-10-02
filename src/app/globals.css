@@ -18,6 +18,23 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* เครดิตผู้สร้างใต้โลโก้ NabKuad (BrandLogo) — เล็ก จาง ไม่แย่งโลโก้ */
+.brand-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.brand-block .brand {
+  line-height: 1.1;
+}
+.brand-credit {
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
 /* =====================================================================
    NabKuad design tokens — First Portfolio theme
    Dark = default (no data-theme attribute yet, e.g. before JS runs)
