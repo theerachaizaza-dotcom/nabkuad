@@ -4,10 +4,15 @@ import type { Metadata } from 'next';
 import { IBM_Plex_Mono, Sarabun } from 'next/font/google';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import ThemeToggle from '@/components/ThemeToggle';
+import AutoRefresh from './AutoRefresh';
 
 export const metadata: Metadata = {
   title: 'Dashboard | Admin',
 };
+
+// หน้า monitoring ต้องเห็นข้อมูลสดเสมอ — ห้าม prerender ตอน build
+// (ไม่งั้นค้างสถานะตอน build: สร้างรอบใหม่ / สตาฟส่งยอด จะไม่อัปเดตที่หน้านี้)
+export const dynamic = 'force-dynamic';
 
 const sarabun = Sarabun({ subsets: ['latin', 'thai'], weight: ['400', '500', '600', '700', '800'] });
 const ibmPlexMono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['500', '600', '700'] });
@@ -49,14 +54,16 @@ const getLocationStatuses = cache(async (sessionId: string) => {
   const { data, error } = await supabaseAdmin
     .from('location_submissions')
     .select('id, status, submitted_at, locations(name, code, sort_order)')
-    .eq('session_id', sessionId)
-    .order('sort_order', { ascending: true, foreignTable: 'locations' });
+    .eq('session_id', sessionId);
 
   if (error) {
     throw new Error(error.message);
   }
 
-  const rows = (data ?? []) as LocationSubmissionRow[];
+  // order บน foreignTable เรียงแค่ข้างใน embed ไม่ได้เรียงแถวหลัก — เรียงเองตาม locations.sort_order
+  const rows = ((data ?? []) as LocationSubmissionRow[]).sort(
+    (a, b) => (a.locations?.sort_order ?? 0) - (b.locations?.sort_order ?? 0)
+  );
 
   return rows.map((row) => ({
     id: row.id,
@@ -139,6 +146,7 @@ export default async function DashboardPage() {
   if (!session) {
     return (
       <div className={`dash-shell ${sarabun.className}`}>
+        <AutoRefresh />
         <style>{`
           :root { --mono-font: ${ibmPlexMono.style.fontFamily}; }
           ${dashboardStyles}
@@ -161,6 +169,7 @@ export default async function DashboardPage() {
 
   return (
     <div className={`dash-shell ${sarabun.className}`}>
+      <AutoRefresh />
       <style>{`
         :root { --mono-font: ${ibmPlexMono.style.fontFamily}; }
         ${dashboardStyles}
