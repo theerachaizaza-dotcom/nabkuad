@@ -95,6 +95,7 @@ export default function Page() {
 				};
 			});
 			setLines(map);
+			setDrafts({}); // ล้างค่าที่พิมพ์ค้างของ location เดิม ให้ช่องโชว์ยอดของ location ใหม่
 		})();
 	}, [sessionId, locationId]);
 
@@ -190,13 +191,22 @@ export default function Page() {
 	}
 
 	function updateDraft(productId: string, key: keyof LineState, value: string) {
+		const current = lines[productId] ?? EMPTY_LINE;
 		setDrafts((prev) => ({
 			...prev,
 			[productId]: {
-				...(prev[productId] ?? { full_bottles: '0', leftover_ml: '0' }),
+				// draft ใหม่ตั้งต้นจากยอดจริง (ไม่ใช่ '0') — กันอีกช่องโชว์ 0 ทั้งที่มียอดอยู่
+				...(prev[productId] ?? { full_bottles: String(current.full_bottles), leftover_ml: String(current.leftover_ml) }),
 				[key]: value,
 			},
 		}));
+	}
+
+	// แตะช่องที่เป็น 0 → ล้างให้ว่าง พิมพ์ได้เลย (ยอดจริงใน lines ยังเป็น 0 ระหว่างว่าง; blur จะคืนเป็น 0)
+	function handleInputFocus(productId: string, key: keyof LineState) {
+		if (Number.parseInt(getDraftValue(productId, key) || '0', 10) === 0) {
+			updateDraft(productId, key, '');
+		}
 	}
 
 	function getDraftValue(productId: string, key: keyof LineState) {
@@ -594,8 +604,14 @@ export default function Page() {
 												<input
 													type="number"
 													inputMode="numeric"
-													value={line.full_bottles}
+													autoComplete="off"
+													pattern="[0-9]*"
+													value={getDraftValue(product.id, 'full_bottles')}
+													onFocus={() => handleInputFocus(product.id, 'full_bottles')}
 													onChange={(event) => handleInputChange(product.id, 'full_bottles', event.target.value)}
+													onBlur={() => handleInputBlur(product.id, 'full_bottles')}
+													onKeyDown={(event) => handleInputKeyDown(event, product.id, 'full_bottles')}
+													placeholder="0"
 												/>
 												<button type="button" onClick={() => adjustLine(product.id, 'full_bottles', 1)}>+</button>
 											</div>
@@ -612,6 +628,7 @@ export default function Page() {
 													autoComplete="off"
 													pattern="[0-9]*"
 													value={getDraftValue(product.id, 'leftover_ml')}
+													onFocus={() => handleInputFocus(product.id, 'leftover_ml')}
 													onChange={(event) => handleInputChange(product.id, 'leftover_ml', event.target.value)}
 													onBlur={() => handleInputBlur(product.id, 'leftover_ml')}
 													onKeyDown={(event) => handleInputKeyDown(event, product.id, 'leftover_ml')}
